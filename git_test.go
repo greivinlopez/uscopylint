@@ -97,6 +97,8 @@ func TestGitModes(t *testing.T) {
 		t.Fatal(err)
 	}
 	check([]string{"app/view.js Customise"}, "--changed", "HEAD", "view.js")
+	check(nil, "--changed", "HEAD", "--allow-in", "view.js=Customise", "view.js")
+	check(nil, "--staged", "--allow-in", "view.js=Favourite", "view.js")
 	if err := os.Chdir(".."); err != nil {
 		t.Fatal(err)
 	}

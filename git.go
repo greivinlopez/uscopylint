@@ -47,7 +47,7 @@ func addedRanges(patch []byte) []lineRange {
 	return ranges
 }
 
-func gitFiles(paths []string, o options, check func(string, []byte, []lineRange)) error {
+func gitFiles(paths []string, o options, check func(string, string, []byte, []lineRange)) error {
 	top, err := git("", "rev-parse", "--show-toplevel")
 	if err != nil {
 		return err
@@ -120,24 +120,24 @@ func gitFiles(paths []string, o options, check func(string, []byte, []lineRange)
 	}
 	sort.Strings(names)
 	for _, p := range names {
+		absolute := filepath.Join(root, filepath.FromSlash(p))
 		var b []byte
 		if o.staged {
 			b, err = git(root, "cat-file", "blob", ":0:"+p)
 		} else {
-			n := filepath.Join(root, filepath.FromSlash(p))
-			info, e := os.Lstat(n)
+			info, e := os.Lstat(absolute)
 			if e != nil {
 				return e
 			}
 			if !info.Mode().IsRegular() {
 				continue
 			}
-			b, err = readFile(n)
+			b, err = readFile(absolute)
 		}
 		if err != nil {
 			return err
 		}
-		check(p, b, files[p])
+		check(p, absolute, b, files[p])
 	}
 	return nil
 }

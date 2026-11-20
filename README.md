@@ -213,6 +213,14 @@ Use one `UK wording | US wording` entry per line. Blank lines and lines beginnin
 
 Use `--ignore "grey,cheque memo"` to allow individual words or phrases. A single allowed word also disables phrase rules containing that word. Matching ignores case and preserves capitalization in suggestions. An ignore applies to the exact inflected form supplied.
 
+Use the repeatable `--allow-in PATH=WORDING` flag to allow wording in one file. For example, an address can retain its official street name while color-picker labels in the same file still get checked.
+
+```sh
+uscopylint --allow-in 'src/Address.tsx=Grey Street' --changed HEAD
+```
+
+Paths are literal and relative to the directory where you run the command, or absolute. For stdin, match the filename passed to `--stdin-name`. Each exception uses the same case-insensitive word and phrase matching as `--ignore`. Other files keep their normal rules. This option is available when building from source after this change and requires a newer release than v0.1.1.
+
 The embedded single-word rules live in `spellings.txt` and `spellings-codespell.txt`. The built-in phrase rules live in `phrases.txt`. To add your own embedded spellings, edit `spellings.txt` and rebuild. Each row gives the British form, the US form, and a comma-separated list of endings. A dash includes the bare form. For example, `colour color -,s,ed,ing` checks four spellings including *coloured* → *colored*. Rules apply to whole words, so *colour* inside `colourPicker` or `button_colour` is left alone.
 
 ## Report a false positive or missed wording
