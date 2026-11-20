@@ -216,6 +216,8 @@ Use the [wording report form](https://github.com/greivinlopez/uscopylint/issues/
 
 ## Build from source
 
+See the [contributor guide](CONTRIBUTING.md) to propose wording rules, report false positives, or run the project checks locally.
+
 From a checkout of this repository, run the tests and install your local build into Go’s binary directory.
 
 ```sh
