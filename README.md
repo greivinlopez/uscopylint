@@ -19,9 +19,9 @@ Run these commands as the user who will run the linter. They install the pinned 
 
 ```sh
 mkdir -p "$HOME/.local/bin"
-GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.0
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.1
 export PATH="$HOME/.local/bin:$PATH"
-uscopylint --help
+uscopylint --version  # uscopylint v0.1.1
 ```
 
 For future login shells, add the `export PATH` line to `~/.profile`. On GitHub-hosted Ubuntu runners, the workflow below handles installation for each job. [GitHub Actions setup](#github-actions)
@@ -64,20 +64,23 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7
         with:
           go-version: stable
           cache: false
 
-      - name: Install uscopylint v0.1.0
+      - name: Install uscopylint v0.1.1
         working-directory: ${{ runner.temp }}
-        run: go install github.com/greivinlopez/uscopylint@v0.1.0
+        run: |
+          go install github.com/greivinlopez/uscopylint@v0.1.1
+          uscopylint --version
+          test "$(uscopylint --version)" = 'uscopylint v0.1.1'
 
       - name: Check pull request changes
         id: scan
@@ -95,14 +98,14 @@ jobs:
 
       - name: Save JSON findings
         if: ${{ always() && steps.scan.outputs.report == 'ready' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: uscopylint-${{ github.event.pull_request.head.sha }}
           path: ${{ runner.temp }}/uscopylint.json
           if-no-files-found: error
 ```
 
-Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Example run with a failed lint check and a successful artifact upload](https://github.com/greivinlopez/uscopylint/actions/runs/44803976059)
+Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Example run with a failed lint check and a successful artifact upload](https://github.com/greivinlopez/uscopylint/actions/runs/44817506177)
 
 ### Other Linux CI runners
 
@@ -136,6 +139,8 @@ Pass flags before paths. Shell-expanded file lists and literal paths are support
 ## JSON for automated fixes
 
 For a CI correction step, use `--output "JSON"` and pass stdout to the editor on exit **1**. Exit **0** means the scan is clean. On exit **2**, read stderr for the error. Format names are case-insensitive and `--format` is an alias for `--output`.
+
+The [JSON Schema for findings](findings.schema.json) describes the array returned by both clean scans and scans with findings. Consumers can ignore unfamiliar properties.
 
 Each JSON entry describes one edit to the scanned snapshot. For example, scanning `<label>Shopping <b>trolley</b></label>` produces this finding.
 
