@@ -40,3 +40,9 @@ go vet ./...
 CI runs both commands on Ubuntu with Go 1.22.x and the current stable Go release. While editing the dictionary, you can run just its rule checks with `go test -run '^TestEveryBundledTerm$' ./...`.
 
 Open your pull request against `main`. If you contribute from a fork, a maintainer approves the workflow run. Both Go checks must pass on an up-to-date branch before the PR can merge.
+
+## Verify the install example for a release
+
+When updating the pinned version in the README, copy its GitHub Actions workflow into a test pull request with a visible label such as `<label>Shopping <b>trolley</b></label>`. Check that the install prints the tagged version, the lint step exits 1, and the artifact contains the edit from `trolley` to `cart`. Link that run from the README. A test branch with an intentional finding is only for verifying the example.
+
+Dependabot checks the project's GitHub Actions weekly. When updating an action, also check the full commit SHA in the README example. Dependabot does not update Markdown code blocks.
