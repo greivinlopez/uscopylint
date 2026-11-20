@@ -9,7 +9,22 @@ uscopylint is a Go CLI that checks user-facing text for British spellings and re
 
 Use it in CI to check just the lines a pull request changes. Human-readable output marks the offending words on their source lines. JSON gives an editor the exact source spans and replacement text. The scanner runs locally and uses the Go standard library.
 
-[Install on Linux](#install-on-linux) · [Add to GitHub Actions](#github-actions) · [Read the JSON findings](#json-for-automated-fixes)
+[Install on macOS](#install-on-macos) · [Install on Linux](#install-on-linux) · [Add to GitHub Actions](#github-actions) · [Read the JSON findings](#json-for-automated-fixes)
+
+## Install on macOS
+
+In Terminal, run `go version` to check for Go 1.22 or later. If you need Go, run `brew install go` with Homebrew, or use the official macOS installer for your Mac (ARM64 for Apple silicon, AMD64 for Intel). [Homebrew Go formula](https://formulae.brew.sh/formula/go) · [Go installer](https://go.dev/dl/)
+
+Install the pinned release from source into your user account. The last command should print `uscopylint v0.1.1`.
+
+```sh
+mkdir -p "$HOME/.local/bin"
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.1
+export PATH="$HOME/.local/bin:$PATH"
+uscopylint --version
+```
+
+To use `uscopylint` in future Terminal sessions with zsh, add the `export PATH` line above to `~/.zshrc` once. To scan a sample label, follow [Try it locally](#try-it-locally). For `--changed` and `--staged`, check that `git --version` works too.
 
 ## Install on Linux
 
@@ -25,6 +40,8 @@ uscopylint --version  # uscopylint v0.1.1
 ```
 
 For future login shells, add the `export PATH` line to `~/.profile`. On GitHub-hosted Ubuntu runners, the workflow below handles installation for each job. [GitHub Actions setup](#github-actions)
+
+## Try it locally
 
 Try it with an inline JSX label. The command reports `trolley → cart` on line 1 and exits with status 1 because it found a match.
 
