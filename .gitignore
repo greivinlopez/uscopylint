@@ -1,0 +1,28 @@
+# Go build and release outputs
+/uscopylint
+/uscopylint.exe
+/bin/
+/dist/
+*.test
+*.test.exe
+
+# Local coverage reports and CPU or memory profiles
+/coverage/
+/coverage.out
+/coverage.html
+*.pprof
+
+# Developer-specific Go workspaces
+/go.work
+/go.work.sum
+
+# Local environment overrides
+.env
+.env.*
+!.env.example
+
+# OS metadata and editor swap files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo

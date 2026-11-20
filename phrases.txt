@@ -1,0 +1,90 @@
+# UK wording | US wording. Keep product-specific and jurisdiction-specific policy in --terms.
+# Payments, statements and billing
+cheque memo | check memo
+cheque memos | check memos
+cheque memo line | check memo line
+cheque number | check number
+cheque numbers | check numbers
+cheque amount | check amount
+cheque date | check date
+cheque payment | check payment
+cheque payments | check payments
+cheque deposit | check deposit
+cheque deposits | check deposits
+cheque register | check register
+cheque stub | check stub
+cheque stubs | check stubs
+cheque book | checkbook
+cheque books | checkbooks
+cheque writer | check writer
+cheque image | check image
+pay by cheque | pay by check
+paid by cheque | paid by check
+deposit a cheque | deposit a check
+write a cheque | write a check
+cash a cheque | cash a check
+cancelled cheque | canceled check
+cancelled cheques | canceled checks
+post-dated cheque | postdated check
+post-dated cheques | postdated checks
+traveller's cheque | traveler's check
+traveller's cheques | traveler's checks
+paying-in slip | deposit slip
+paying-in slips | deposit slips
+paying in slip | deposit slip
+paying in slips | deposit slips
+cash machine | ATM
+cash machines | ATMs
+expiry date | expiration date
+expiry dates | expiration dates
+card expiry | card expiration
+card expiry date | card expiration date
+monthly instalment | monthly installment
+monthly instalments | monthly installments
+# Retail, delivery and customer support
+shopping trolley | shopping cart
+shopping trolleys | shopping carts
+add to trolley | add to cart
+delivery postcode | delivery postal code
+billing postcode | billing postal code
+US postcode | US ZIP code
+US postcodes | US ZIP codes
+despatch date | shipping date
+despatch confirmation | shipping confirmation
+till receipt | sales receipt
+till receipts | sales receipts
+contact centre | contact center
+call centre | call center
+help centre | help center
+support centre | support center
+service centre | service center
+customer enquiries | customer inquiries
+general enquiries | general inquiries
+# Application UI and common travel / appointment copy
+dialogue box | dialog box
+dialogue boxes | dialog boxes
+tick the box | check the box
+tick this box | check this box
+tick the checkbox | check the checkbox
+untick the box | uncheck the box
+untick this box | uncheck this box
+untick the checkbox | uncheck the checkbox
+tick all that apply | check all that apply
+driving licence | driver's license
+driving licences | driver's licenses
+licence plate | license plate
+licence plates | license plates
+number plate | license plate
+number plates | license plates
+car park | parking lot
+car parks | parking lots
+car park entrance | parking lot entrance
+car hire | car rental
+hire car | rental car
+hire cars | rental cars
+petrol station | gas station
+petrol stations | gas stations
+railway station | train station
+railway stations | train stations
+city centre | city center
+town centre | town center
