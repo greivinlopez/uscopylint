@@ -205,6 +205,10 @@ Use `--ignore "grey,cheque memo"` to allow individual words or phrases. A single
 
 The embedded single-word rules live in `spellings.txt` and `spellings-codespell.txt`. The built-in phrase rules live in `phrases.txt`. To add your own embedded spellings, edit `spellings.txt` and rebuild. Each row gives the British form, the US form, and a comma-separated list of endings. A dash includes the bare form. For example, `colour color -,s,ed,ing` checks four spellings including *coloured* → *colored*. Rules apply to whole words, so *colour* inside `colourPicker` or `button_colour` is left alone.
 
+## Report a false positive or missed wording
+
+Use the [wording report form](https://github.com/greivinlopez/uscopylint/issues/new?template=wording-report.yml) with the filename, a minimal snippet, the command you ran, and the result you expected. Run `uscopylint --version` to identify your build. If you use v0.1.0, enter the installation tag or commit in the form because that release predates the flag.
+
 ## Build from source
 
 From a checkout of this repository, run the tests and install your local build into Go’s binary directory.
