@@ -38,7 +38,7 @@ jobs:
           exit "$status"
 
       - name: Save JSON findings
-        if: ${{ !cancelled() && steps.scan.outputs.report == 'ready' }}
+        if: ${{ always() && steps.scan.outputs.report == 'ready' }}
         uses: actions/upload-artifact@v7
         with:
           name: uscopylint-${{ github.event.pull_request.head.sha }}
