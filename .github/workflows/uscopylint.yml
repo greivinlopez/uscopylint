@@ -8,20 +8,23 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           persist-credentials: false
 
-      - uses: actions/setup-go@v7
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7
         with:
           go-version: stable
           cache: false
 
-      - name: Install uscopylint v0.1.0
+      - name: Install uscopylint v0.1.1
         working-directory: ${{ runner.temp }}
-        run: go install github.com/greivinlopez/uscopylint@v0.1.0
+        run: |
+          go install github.com/greivinlopez/uscopylint@v0.1.1
+          uscopylint --version
+          test "$(uscopylint --version)" = 'uscopylint v0.1.1'
 
       - name: Check pull request changes
         id: scan
@@ -39,7 +42,7 @@ jobs:
 
       - name: Save JSON findings
         if: ${{ always() && steps.scan.outputs.report == 'ready' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: uscopylint-${{ github.event.pull_request.head.sha }}
           path: ${{ runner.temp }}/uscopylint.json
