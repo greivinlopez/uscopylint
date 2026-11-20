@@ -19,12 +19,12 @@ jobs:
           go-version: stable
           cache: false
 
-      - name: Install uscopylint v0.1.1
+      - name: Install uscopylint v0.1.2
         working-directory: ${{ runner.temp }}
         run: |
-          go install github.com/greivinlopez/uscopylint@v0.1.1
+          go install github.com/greivinlopez/uscopylint@v0.1.2
           uscopylint --version
-          test "$(uscopylint --version)" = 'uscopylint v0.1.1'
+          test "$(uscopylint --version)" = 'uscopylint v0.1.2'
 
       - name: Check pull request changes
         id: scan
