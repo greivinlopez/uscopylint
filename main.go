@@ -10,6 +10,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"runtime/debug"
 	"strings"
 	"unicode/utf16"
 	"unicode/utf8"
@@ -25,6 +26,7 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 	var o options
 	f := flag.NewFlagSet("uscopylint", flag.ContinueOnError)
 	f.SetOutput(errOut)
+	showVersion := f.Bool("version", false, "print the build version and exit")
 	f.StringVar(&o.mode, "mode", "auto", "auto, code, markup, or text (check every word)")
 	f.StringVar(&o.format, "output", "text", "output format: text or JSON (case-insensitive)")
 	f.StringVar(&o.format, "format", "text", "alias for --output")
@@ -42,6 +44,17 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 			return 0
 		}
 		return 2
+	}
+	if *showVersion {
+		version := "(devel)"
+		if info, ok := debug.ReadBuildInfo(); ok && info.Main.Version != "" {
+			version = info.Main.Version
+		}
+		if _, err := fmt.Fprintln(out, "uscopylint", version); err != nil {
+			fmt.Fprintln(errOut, "uscopylint:", err)
+			return 2
+		}
+		return 0
 	}
 	o.format = strings.ToLower(o.format)
 	if o.format != "text" && o.format != "json" {

@@ -61,6 +61,15 @@ func TestCLIMarkedSource(t *testing.T) {
 		t.Fatalf("status %d, stdout %q, stderr %q", status, out.String(), diag.String())
 	}
 }
+func TestVersionSkipsScan(t *testing.T) {
+	var out, diag bytes.Buffer
+	status := run([]string{"--version", "--terms", "absent/terms.txt", "-"}, nil, &out, &diag)
+	fields := strings.Fields(out.String())
+	if status != 0 || diag.Len() != 0 || len(fields) != 2 || fields[0] != "uscopylint" || out.String() != strings.Join(fields, " ")+"\n" {
+		t.Fatalf("status %d, stdout %q, stderr %q", status, out.String(), diag.String())
+	}
+}
+
 func TestCLI(t *testing.T) {
 	for _, tc := range []struct {
 		args     []string

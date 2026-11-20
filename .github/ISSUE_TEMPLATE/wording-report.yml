@@ -1,0 +1,58 @@
+name: False positive or missed wording
+description: Report wording uscopylint flagged incorrectly or should have detected.
+body:
+  - type: dropdown
+    id: kind
+    attributes:
+      label: What happened?
+      options:
+        - False positive (wording should be allowed)
+        - Missed wording (a finding was expected)
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: uscopylint version
+      description: Paste the output of `uscopylint --version`. For v0.1.0, enter the installed tag or commit.
+    validations:
+      required: true
+  - type: input
+    id: filename
+    attributes:
+      label: Filename including extension
+      description: For standard input, give the name passed to --stdin-name, or enter stdin if you omitted it.
+      placeholder: Cart.tsx
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Smallest source snippet that reproduces the issue
+      description: Include surrounding tags, quotes, or function calls that affect how the wording is displayed.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and relevant settings
+      description: Include the flags you used and any custom glossary entries involved.
+      placeholder: uscopylint --output JSON Cart.tsx
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Paste the finding, or enter [] for a clean JSON scan and “no findings” for a clean text scan.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+      description: For a false positive, explain why the wording belongs here. For missed wording, give the phrase and the US replacement you expected.
+    validations:
+      required: true
