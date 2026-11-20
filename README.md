@@ -138,3 +138,9 @@ Use one `UK wording | US wording` entry per line. Blank lines and lines beginnin
 Use `--ignore "grey,cheque memo"` to allow individual words or phrases. A single allowed word also disables phrase rules containing that word. Matching ignores case and preserves capitalization in suggestions. An ignore applies to the exact inflected form supplied.
 
 The embedded single-word rules live in `spellings.txt` and `spellings-codespell.txt`. The built-in phrase rules live in `phrases.txt`. To add your own embedded spellings, edit `spellings.txt` and rebuild. Each row gives the British form, the US form, and a comma-separated list of endings. A dash includes the bare form. For example, `colour color -,s,ed,ing` checks four spellings including *coloured* → *colored*. Rules apply to whole words, so *colour* inside `colourPicker` or `button_colour` is left alone.
+
+## License
+
+The original uscopylint code and documentation are available under the [MIT License](LICENSE).
+
+The embedded `spellings-codespell.txt` dictionary is adapted from Codespell 2.4.3 and retains its CC BY-SA 3.0 license. When redistributing the source or a compiled binary, include the MIT notice and the dictionary attribution and license link. Distributed adaptations of that dictionary must follow its ShareAlike terms. [Dictionary attribution](spellings-codespell.txt) · [CC BY-SA 3.0](https://creativecommons.org/licenses/by-sa/3.0/)
