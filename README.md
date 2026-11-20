@@ -4,14 +4,22 @@ uscopylint is a Go CLI that checks user-facing text for British spellings and re
 
 Use it in CI to check just the lines a pull request changes. Human-readable output marks the offending words on their source lines. JSON gives an editor the exact source spans and replacement text. The scanner runs locally and uses the Go standard library.
 
-## Quick start
+[Install on Linux](#install-on-linux) · [Add to GitHub Actions](#github-actions) · [Read the JSON findings](#json-for-automated-fixes)
 
-From this source directory, run the following with Go 1.22 or later. The install command places the executable in Go’s binary directory. The examples assume that directory is on your PATH.
+## Install on Linux
+
+Install Go 1.22 or later on your Linux machine or CI runner. You also need Git for `--changed` and `--staged`. Use `go version` and `git --version` to check the prerequisites. [Go installation instructions for Linux](https://go.dev/doc/install)
+
+Run these commands as the user who will run the linter. They install the pinned release into a user-writable directory and make it available in the current shell.
 
 ```sh
-go test ./...
-go install .
+mkdir -p "$HOME/.local/bin"
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.0
+export PATH="$HOME/.local/bin:$PATH"
+uscopylint --help
 ```
+
+For future login shells, add the `export PATH` line to `~/.profile`. On GitHub-hosted Ubuntu runners, the workflow below handles installation for each job. [GitHub Actions setup](#github-actions)
 
 Try it with an inline JSX label. The command reports `trolley → cart` on line 1 and exits with status 1 because it found a match.
 
@@ -34,37 +42,11 @@ src/Settings.tsx:8:19: colour → color
   |         ^^^^^^^^^ ^^^^^^
 ```
 
-## Workflows
-
-| Command | What it checks |
-| --- | --- |
-| `uscopylint --changed HEAD` | Added and modified working-tree lines relative to HEAD, plus nonignored untracked files. |
-| `uscopylint --staged` | Added and modified lines in the staged snapshot, including the first commit. |
-| `uscopylint --changed "$base" src` | Changes under a specific path since a chosen commit. |
-| `uscopylint src pages/help.md` | Complete files or directory trees. With no paths, scans the current directory. |
-| `uscopylint --mode text path/to/file` | All words, including comments and identifiers that are standalone words. |
-| `uscopylint --mode code schema.xyz` | Quoted strings in a file with an unfamiliar extension. |
-| `uscopylint --stdin-name Settings.tsx -` | Standard input, classified and reported under the supplied name. |
-| `uscopylint --output "JSON" --changed "$base"` | A JSON array on stdout with one entry per source edit, including the source line, exact span, and replacement. |
-
-Pass flags before paths. Shell-expanded file lists and literal paths are supported. Git modes default to the current directory and its descendants, and report paths relative to the repository root. They use Git’s own added-line ranges, so an edited line can also report an older spelling elsewhere on that same line. The scanner reads the surrounding file to interpret multiline strings and templates.
-
-## CI integration
-
-For a pull-request check, fetch the target branch and enough history to resolve its merge base, then run the check in the checkout with the executable on PATH.
-
-```sh
-base=$(git merge-base origin/main HEAD) || exit 2
-uscopylint --changed "$base"
-```
-
-Exit code **0** means clean, **1** means findings, and **2** means a usage, input, or Git error. A clean JSON run prints `[]`. In each JSON finding, `sourceLine` contains the decoded source line with its indentation and trailing spaces. The line terminator is omitted. `line` and `column` start at 1. The word spans `column` through `endColumn - 1`, counted in Unicode code points.
-
-Text diagnostics use plain carets and preserve tabs for alignment. For lines containing non-ASCII characters, a second copy uses `[[word]]` markers so the match is clear regardless of how the CI viewer renders character widths.
+## Add uscopylint to CI
 
 ### GitHub Actions
 
-Save this as `.github/workflows/uscopylint.yml` in the application repository. It checks out the pull request's head commit and compares it with the merge base, so line numbers point into the contributor's branch even when the target branch has moved.
+Create `.github/workflows/uscopylint.yml` in the application repository, paste the workflow below, and commit it. Open or update a pull request to run the check on Ubuntu. It checks out the pull request's head commit and compares it with the merge base, so line numbers point into the contributor's branch even when the target branch has moved.
 
 ```yaml
 name: US copy lint
@@ -107,7 +89,7 @@ jobs:
           exit "$status"
 
       - name: Save JSON findings
-        if: ${{ !cancelled() && steps.scan.outputs.report == 'ready' }}
+        if: ${{ always() && steps.scan.outputs.report == 'ready' }}
         uses: actions/upload-artifact@v7
         with:
           name: uscopylint-${{ github.event.pull_request.head.sha }}
@@ -115,7 +97,36 @@ jobs:
           if-no-files-found: error
 ```
 
-Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic.
+Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Example run with a failed lint check and a successful artifact upload](https://github.com/greivinlopez/uscopylint/actions/runs/44803976059)
+
+### Other Linux CI runners
+
+Install the pinned CLI using the Linux commands above. Check out the pull request head and fetch its target branch with enough history to resolve their merge base. This example targets `main`. Set `REPORT_DIR` to an artifact directory outside the checkout, and configure your CI to upload `uscopylint.json` on both exit 0 and exit 1.
+
+```sh
+base=$(git merge-base origin/main HEAD) || exit 2
+mkdir -p "${REPORT_DIR:?set REPORT_DIR to a directory outside the checkout}"
+uscopylint --changed "$base" --output JSON > "$REPORT_DIR/uscopylint.json"
+```
+
+Exit code **0** means clean, **1** means findings, and **2** means a usage, input, or Git error. A clean JSON run prints `[]`. In each JSON finding, `sourceLine` contains the decoded source line with its indentation and trailing spaces. The line terminator is omitted. `line` and `column` start at 1. The word spans `column` through `endColumn - 1`, counted in Unicode code points.
+
+Text diagnostics use plain carets and preserve tabs for alignment. For lines containing non-ASCII characters, a second copy uses `[[word]]` markers so the match is clear regardless of how the CI viewer renders character widths.
+
+## Workflows
+
+| Command | What it checks |
+| --- | --- |
+| `uscopylint --changed HEAD` | Added and modified working-tree lines relative to HEAD, plus nonignored untracked files. |
+| `uscopylint --staged` | Added and modified lines in the staged snapshot, including the first commit. |
+| `uscopylint --changed "$base" src` | Changes under a specific path since a chosen commit. |
+| `uscopylint src pages/help.md` | Complete files or directory trees. With no paths, scans the current directory. |
+| `uscopylint --mode text path/to/file` | All words, including comments and identifiers that are standalone words. |
+| `uscopylint --mode code schema.xyz` | Quoted strings in a file with an unfamiliar extension. |
+| `uscopylint --stdin-name Settings.tsx -` | Standard input, classified and reported under the supplied name. |
+| `uscopylint --output "JSON" --changed "$base"` | A JSON array on stdout with one entry per source edit, including the source line, exact span, and replacement. |
+
+Pass flags before paths. Shell-expanded file lists and literal paths are supported. Git modes default to the current directory and its descendants, and report paths relative to the repository root. They use Git’s own added-line ranges, so an edited line can also report an older spelling elsewhere on that same line. The scanner reads the surrounding file to interpret multiline strings and templates.
 
 ## JSON for automated fixes
 
@@ -193,6 +204,15 @@ Use one `UK wording | US wording` entry per line. Blank lines and lines beginnin
 Use `--ignore "grey,cheque memo"` to allow individual words or phrases. A single allowed word also disables phrase rules containing that word. Matching ignores case and preserves capitalization in suggestions. An ignore applies to the exact inflected form supplied.
 
 The embedded single-word rules live in `spellings.txt` and `spellings-codespell.txt`. The built-in phrase rules live in `phrases.txt`. To add your own embedded spellings, edit `spellings.txt` and rebuild. Each row gives the British form, the US form, and a comma-separated list of endings. A dash includes the bare form. For example, `colour color -,s,ed,ing` checks four spellings including *coloured* → *colored*. Rules apply to whole words, so *colour* inside `colourPicker` or `button_colour` is left alone.
+
+## Build from source
+
+From a checkout of this repository, run the tests and install your local build into Go’s binary directory.
+
+```sh
+go test ./...
+go install .
+```
 
 ## License
 
