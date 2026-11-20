@@ -122,7 +122,7 @@ jobs:
           if-no-files-found: error
 ```
 
-Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Example pull request that exercises the failure and artifact upload](https://github.com/greivinlopez/uscopylint/pull/1/checks)
+Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Verified v0.1.2 run showing a lint failure and successful JSON upload](https://github.com/greivinlopez/uscopylint/actions/runs/44825033837)
 
 ### Other Linux CI runners
 
