@@ -1,0 +1,30 @@
+name: Verify v0.1.1 install
+
+on:
+  push:
+    branches: ['verify/v0.1.1-install']
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+      - name: Install the public release and check the exact version
+        shell: bash
+        working-directory: ${{ runner.temp }}
+        run: |
+          export GOBIN="$RUNNER_TEMP/release-bin"
+          export GOMODCACHE="$RUNNER_TEMP/release-modcache"
+          export PATH="$GOBIN:$PATH"
+          go install github.com/greivinlopez/uscopylint@v0.1.1
+          test "$(command -v uscopylint)" = "$GOBIN/uscopylint"
+          uscopylint --version > actual.txt
+          printf '%s\n' 'uscopylint v0.1.1' > expected.txt
+          cmp expected.txt actual.txt
+          cat actual.txt
