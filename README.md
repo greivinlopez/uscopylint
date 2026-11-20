@@ -137,6 +137,8 @@ Pass flags before paths. Shell-expanded file lists and literal paths are support
 
 For a CI correction step, use `--output "JSON"` and pass stdout to the editor on exit **1**. Exit **0** means the scan is clean. On exit **2**, read stderr for the error. Format names are case-insensitive and `--format` is an alias for `--output`.
 
+The [JSON Schema for findings](findings.schema.json) describes the array returned by both clean scans and scans with findings. Consumers can ignore unfamiliar properties.
+
 Each JSON entry describes one edit to the scanned snapshot. For example, scanning `<label>Shopping <b>trolley</b></label>` produces this finding.
 
 ```json
