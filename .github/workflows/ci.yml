@@ -1,0 +1,29 @@
+name: Project CI
+
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: Go ${{ matrix.go }} on Ubuntu
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        go: ['1.22.x', 'stable']
+    env:
+      GOTOOLCHAIN: local
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-go@v7
+        with:
+          go-version: ${{ matrix.go }}
+          check-latest: true
+      - name: Test
+        run: go test ./...
+      - name: Vet
+        run: go vet ./...
