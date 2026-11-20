@@ -34,6 +34,24 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 	f.StringVar(&o.changed, "changed", "", "check added/modified working-tree lines since a Git revision, plus untracked files")
 	f.BoolVar(&o.staged, "staged", false, "check added/modified lines in the Git index")
 	f.StringVar(&o.ignore, "ignore", "", "comma-separated words or phrases to allow (case-insensitive)")
+	fileExceptions := make(map[string][]string)
+	f.Func("allow-in", "allow a word or phrase in one exact file: PATH=WORDING (repeatable)", func(value string) error {
+		delimiter := strings.LastIndexByte(value, '=')
+		if delimiter <= 0 {
+			return fmt.Errorf("expected PATH=WORDING")
+		}
+		path := value[:delimiter]
+		wording := strings.TrimSpace(value[delimiter+1:])
+		if err := validateTerm(wording); err != nil {
+			return err
+		}
+		absolute, err := filepath.Abs(path)
+		if err != nil {
+			return err
+		}
+		fileExceptions[absolute] = append(fileExceptions[absolute], wording)
+		return nil
+	})
 	f.StringVar(&o.terms, "terms", "", "additional UK | US terminology file")
 	f.Usage = func() {
 		fmt.Fprintln(errOut, "Usage: uscopylint [options] [file|directory ...]\nUse - for stdin. With no paths, scan the current directory.\nExit: 0 clean, 1 findings, 2 error.")
@@ -85,12 +103,12 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 		words.allow(strings.TrimSpace(word))
 	}
 	found := []finding{}
-	check := func(path string, data []byte, ranges []lineRange) {
+	check := func(path, absolute string, data []byte, ranges []lineRange) {
 		s, ok := decodeText(data)
 		if !ok {
 			return
 		}
-		scan(path, s, o.mode, words, ranges, func(f finding) { found = append(found, f) })
+		scan(path, s, o.mode, words.withExceptions(fileExceptions[absolute]), ranges, func(f finding) { found = append(found, f) })
 	}
 	paths := f.Args()
 	var err error
@@ -110,7 +128,13 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 				var b []byte
 				b, err = io.ReadAll(in)
 				if err == nil {
-					check(o.name, b, nil)
+					var absolute string
+					if len(fileExceptions) > 0 {
+						absolute, err = filepath.Abs(o.name)
+					}
+					if err == nil {
+						check(o.name, absolute, b, nil)
+					}
 				}
 			} else {
 				err = filepath.WalkDir(path, func(p string, d fs.DirEntry, walkErr error) error {
@@ -136,7 +160,7 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 					seen[abs] = true
 					b, e := readFile(p)
 					if e == nil {
-						check(p, b, nil)
+						check(p, abs, b, nil)
 					}
 					return e
 				})

@@ -3,6 +3,7 @@ package main
 import (
 	_ "embed"
 	"fmt"
+	"maps"
 	"strings"
 	"unicode"
 	"unicode/utf8"
@@ -122,19 +123,26 @@ func (v *vocabulary) loadTerms(data string) error {
 		if !ok || key == "" || repl == "" || strings.Contains(repl, "|") {
 			return fmt.Errorf("line %d: expected UK wording | US wording", n+1)
 		}
-		first, _ := utf8.DecodeRuneInString(key)
-		last, _ := utf8.DecodeLastRuneInString(key)
-		if !wordRune(first) || !wordRune(last) {
-			return fmt.Errorf("line %d: wording must begin and end with a word", n+1)
-		}
-		for i := 0; i < len(key); {
-			token, end := nextTermToken(key, i)
-			if token == "" {
-				return fmt.Errorf("line %d: unsupported separator in %q", n+1, key)
-			}
-			i = end
+		if err := validateTerm(key); err != nil {
+			return fmt.Errorf("line %d: %w", n+1, err)
 		}
 		v.add(key, repl)
+	}
+	return nil
+}
+
+func validateTerm(key string) error {
+	first, _ := utf8.DecodeRuneInString(key)
+	last, _ := utf8.DecodeLastRuneInString(key)
+	if !wordRune(first) || !wordRune(last) {
+		return fmt.Errorf("wording must begin and end with a word")
+	}
+	for i := 0; i < len(key); {
+		token, end := nextTermToken(key, i)
+		if token == "" {
+			return fmt.Errorf("unsupported separator in %q", key)
+		}
+		i = end
 	}
 	return nil
 }
@@ -148,6 +156,41 @@ func (v *vocabulary) allow(key string) {
 		return
 	}
 	v.add(key, "")
+}
+
+// Copy just the trie branches that a file's exceptions can modify.
+// All other rules, including custom terminology, stay shared and read-only.
+func (v *vocabulary) withExceptions(keys []string) *vocabulary {
+	if len(keys) == 0 {
+		return v
+	}
+	local := *v
+	local.allowedWords = maps.Clone(v.allowedWords)
+	for _, key := range keys {
+		if wordEnd(key, 0) == len(key) {
+			local.allow(key)
+			continue
+		}
+		node := &local.root
+		for i := 0; i < len(key); {
+			token, end := nextTermToken(key, i)
+			children := maps.Clone(node.next)
+			if children == nil {
+				children = make(map[string]*termNode)
+			}
+			var child termNode
+			if old := children[token]; old != nil {
+				child = *old
+			}
+			children[token] = &child
+			node.next = children
+			node = &child
+			i = end
+		}
+		node.terminal = true
+		node.replacement = ""
+	}
+	return &local
 }
 
 func (v *vocabulary) match(s string, firstEnd int) (end int, replacement string) {
