@@ -1,4 +1,9 @@
-# uscopylint
+<h1>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="assets/logo/uscopylint-horizontal-dark.svg">
+    <img src="assets/logo/uscopylint-horizontal.svg" alt="uscopylint" width="300">
+  </picture>
+</h1>
 
 uscopylint is a Go CLI that checks user-facing text for British spellings and regional phrases. Point it at an application checkout to find wording such as *cheque memo* in a payment form or *shopping trolley* split across JSX tags. It reads inline copy directly, so it also works in applications without translation files or centralized string constants.
 
