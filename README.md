@@ -62,6 +62,61 @@ Exit code **0** means clean, **1** means findings, and **2** means a usage, inpu
 
 Text diagnostics use plain carets and preserve tabs for alignment. For lines containing non-ASCII characters, a second copy uses `[[word]]` markers so the match is clear regardless of how the CI viewer renders character widths.
 
+### GitHub Actions
+
+Save this as `.github/workflows/uscopylint.yml` in the application repository. It checks out the pull request's head commit and compares it with the merge base, so line numbers point into the contributor's branch even when the target branch has moved.
+
+```yaml
+name: US copy lint
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Install uscopylint v0.1.0
+        working-directory: ${{ runner.temp }}
+        run: go install github.com/greivinlopez/uscopylint@v0.1.0
+
+      - name: Check pull request changes
+        id: scan
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          base=$(git merge-base "$BASE_SHA" HEAD)
+          status=0
+          uscopylint --changed "$base" --output JSON > "$RUNNER_TEMP/uscopylint.json" || status=$?
+          if (( status == 0 || status == 1 )); then
+            echo "report=ready" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
+
+      - name: Save JSON findings
+        if: ${{ !cancelled() && steps.scan.outputs.report == 'ready' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: uscopylint-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/uscopylint.json
+          if-no-files-found: error
+```
+
+Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic.
+
 ## JSON for automated fixes
 
 For a CI correction step, use `--output "JSON"` and pass stdout to the editor on exit **1**. Exit **0** means the scan is clean. On exit **2**, read stderr for the error. Format names are case-insensitive and `--format` is an alias for `--output`.
