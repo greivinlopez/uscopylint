@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "uscopylint JSON findings",
+  "description": "Each item is one edit to the scanned snapshot. A clean scan returns an empty array.",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "required": ["path", "line", "column", "endColumn", "word", "suggestion", "sourceLine"],
+    "properties": {
+      "path": { "type": "string" },
+      "line": { "type": "integer", "minimum": 1 },
+      "column": { "type": "integer", "minimum": 1, "description": "First Unicode code point of this edit, counted from 1." },
+      "endColumn": { "type": "integer", "minimum": 1, "description": "Exclusive end column, counted in Unicode code points." },
+      "word": { "type": "string", "description": "Original text in this source span." },
+      "suggestion": { "type": "string", "description": "Replacement for this span. An empty string deletes it." },
+      "sourceLine": { "type": "string", "description": "Original decoded line without its line terminator." },
+      "phrase": {
+        "type": "object",
+        "description": "Rendered phrase spanning JSX fragments. Use its starting location to group the edits.",
+        "required": ["word", "suggestion", "line", "column"],
+        "properties": {
+          "word": { "type": "string" },
+          "suggestion": { "type": "string" },
+          "line": { "type": "integer", "minimum": 1 },
+          "column": { "type": "integer", "minimum": 1 }
+        }
+      }
+    }
+  }
+}
