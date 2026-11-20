@@ -1,0 +1,46 @@
+name: US copy lint
+on: pull_request
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - uses: actions/setup-go@v7
+        with:
+          go-version: stable
+          cache: false
+
+      - name: Install uscopylint v0.1.0
+        working-directory: ${{ runner.temp }}
+        run: go install github.com/greivinlopez/uscopylint@v0.1.0
+
+      - name: Check pull request changes
+        id: scan
+        shell: bash
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        run: |
+          base=$(git merge-base "$BASE_SHA" HEAD)
+          status=0
+          uscopylint --changed "$base" --output JSON > "$RUNNER_TEMP/uscopylint.json" || status=$?
+          if (( status == 0 || status == 1 )); then
+            echo "report=ready" >> "$GITHUB_OUTPUT"
+          fi
+          exit "$status"
+
+      - name: Save JSON findings
+        if: ${{ !cancelled() && steps.scan.outputs.report == 'ready' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: uscopylint-${{ github.event.pull_request.head.sha }}
+          path: ${{ runner.temp }}/uscopylint.json
+          if-no-files-found: error
