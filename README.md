@@ -15,11 +15,11 @@ Use it in CI to check just the lines a pull request changes. Human-readable outp
 
 In Terminal, run `go version` to check for Go 1.22 or later. If you need Go, run `brew install go` with Homebrew, or use the official macOS installer for your Mac (ARM64 for Apple silicon, AMD64 for Intel). [Homebrew Go formula](https://formulae.brew.sh/formula/go) · [Go installer](https://go.dev/dl/)
 
-Install the pinned release from source into your user account. The last command should print `uscopylint v0.1.1`.
+Install the pinned release from source into your user account. The last command should print `uscopylint v0.1.2`.
 
 ```sh
 mkdir -p "$HOME/.local/bin"
-GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.1
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.2
 export PATH="$HOME/.local/bin:$PATH"
 uscopylint --version
 ```
@@ -34,9 +34,9 @@ Run these commands as the user who will run the linter. They install the pinned 
 
 ```sh
 mkdir -p "$HOME/.local/bin"
-GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.1
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.2
 export PATH="$HOME/.local/bin:$PATH"
-uscopylint --version  # uscopylint v0.1.1
+uscopylint --version  # uscopylint v0.1.2
 ```
 
 For future login shells, add the `export PATH` line to `~/.profile`. On GitHub-hosted Ubuntu runners, the workflow below handles installation for each job. [GitHub Actions setup](#github-actions)
@@ -92,12 +92,12 @@ jobs:
           go-version: stable
           cache: false
 
-      - name: Install uscopylint v0.1.1
+      - name: Install uscopylint v0.1.2
         working-directory: ${{ runner.temp }}
         run: |
-          go install github.com/greivinlopez/uscopylint@v0.1.1
+          go install github.com/greivinlopez/uscopylint@v0.1.2
           uscopylint --version
-          test "$(uscopylint --version)" = 'uscopylint v0.1.1'
+          test "$(uscopylint --version)" = 'uscopylint v0.1.2'
 
       - name: Check pull request changes
         id: scan
@@ -122,7 +122,7 @@ jobs:
           if-no-files-found: error
 ```
 
-Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Example run with a failed lint check and a successful artifact upload](https://github.com/greivinlopez/uscopylint/actions/runs/44817506177)
+Download the `uscopylint-<head SHA>` artifact from the workflow run and pass its `uscopylint.json` to the AI editing that commit. Findings fail the check and still produce the artifact. A clean run saves `[]`. If the scan itself errors, the job fails and the Actions log contains the diagnostic. [Example pull request that exercises the failure and artifact upload](https://github.com/greivinlopez/uscopylint/pull/1/checks)
 
 ### Other Linux CI runners
 
@@ -236,7 +236,7 @@ Use the repeatable `--allow-in PATH=WORDING` flag to allow wording in one file. 
 uscopylint --allow-in 'src/Address.tsx=Grey Street' --changed HEAD
 ```
 
-Paths are literal and relative to the directory where you run the command, or absolute. For stdin, match the filename passed to `--stdin-name`. Each exception uses the same case-insensitive word and phrase matching as `--ignore`. Other files keep their normal rules. This option is available when building from source after this change and requires a newer release than v0.1.1.
+Paths are literal and relative to the directory where you run the command, or absolute. For stdin, match the filename passed to `--stdin-name`. Each exception uses the same case-insensitive word and phrase matching as `--ignore`. Other files keep their normal rules. The flag is available starting in v0.1.2.
 
 The embedded single-word rules live in `spellings.txt` and `spellings-codespell.txt`. The built-in phrase rules live in `phrases.txt`. To add your own embedded spellings, edit `spellings.txt` and rebuild. Each row gives the British form, the US form, and a comma-separated list of endings. A dash includes the bare form. For example, `colour color -,s,ed,ing` checks four spellings including *coloured* → *colored*. Rules apply to whole words, so *colour* inside `colourPicker` or `button_colour` is left alone.
 
