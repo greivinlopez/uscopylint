@@ -43,6 +43,8 @@ Open your pull request against `main`. If you contribute from a fork, a maintain
 
 ## Verify the install example for a release
 
-When updating the pinned version in the README, copy its GitHub Actions workflow into a test pull request with a visible label such as `<label>Shopping <b>trolley</b></label>`. Check that the install prints the tagged version, the lint step exits 1, and the artifact contains the edit from `trolley` to `cart`. Link that run from the README. A test branch with an intentional finding is only for verifying the example.
+Publishing a release starts the [release verification workflow](.github/workflows/verify-release.yml). To rerun it, open **Actions → Verify release → Run workflow** and enter the published tag, such as `v0.1.3`. An empty tag selects the latest release. Pull requests that edit the workflow also test the latest release.
+
+The workflow installs the tag on Ubuntu, checks its version, and introduces a known wording change in a temporary Git repository. A passing run confirms that the CLI exited 1, reported exactly the expected `trolley` → `cart` edit, and uploaded `uscopylint.json` in the **uscopylint-release-findings** artifact. When updating the README pins, link the passing run for that version.
 
 Dependabot checks the project's GitHub Actions weekly. When updating an action, also check the full commit SHA in the README example. Dependabot does not update Markdown code blocks.
