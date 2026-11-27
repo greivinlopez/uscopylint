@@ -15,11 +15,11 @@ Use it in CI to check just the lines a pull request changes. Human-readable outp
 
 In Terminal, run `go version` to check for Go 1.22 or later. If you need Go, run `brew install go` with Homebrew, or use the official macOS installer for your Mac (ARM64 for Apple silicon, AMD64 for Intel). [Homebrew Go formula](https://formulae.brew.sh/formula/go) · [Go installer](https://go.dev/dl/)
 
-Install the pinned release from source into your user account. The last command should print `uscopylint v0.1.2`.
+Install the pinned release from source into your user account. The last command should print `uscopylint v0.1.3`.
 
 ```sh
 mkdir -p "$HOME/.local/bin"
-GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.2
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.3
 export PATH="$HOME/.local/bin:$PATH"
 uscopylint --version
 ```
@@ -34,14 +34,16 @@ Run these commands as the user who will run the linter. They install the pinned 
 
 ```sh
 mkdir -p "$HOME/.local/bin"
-GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.2
+GOBIN="$HOME/.local/bin" go install github.com/greivinlopez/uscopylint@v0.1.3
 export PATH="$HOME/.local/bin:$PATH"
-uscopylint --version  # uscopylint v0.1.2
+uscopylint --version  # uscopylint v0.1.3
 ```
 
 For future login shells, add the `export PATH` line to `~/.profile`. On GitHub-hosted Ubuntu runners, the workflow below handles installation for each job. [GitHub Actions setup](#github-actions)
 
 ## Try it locally
+
+Run `uscopylint --help` for scan examples, exit codes, and instructions for applying JSON findings.
 
 Try it with an inline JSX label. The command reports `trolley → cart` on line 1 and exits with status 1 because it found a match.
 
@@ -92,12 +94,12 @@ jobs:
           go-version: stable
           cache: false
 
-      - name: Install uscopylint v0.1.2
+      - name: Install uscopylint v0.1.3
         working-directory: ${{ runner.temp }}
         run: |
-          go install github.com/greivinlopez/uscopylint@v0.1.2
+          go install github.com/greivinlopez/uscopylint@v0.1.3
           uscopylint --version
-          test "$(uscopylint --version)" = 'uscopylint v0.1.2'
+          test "$(uscopylint --version)" = 'uscopylint v0.1.3'
 
       - name: Check pull request changes
         id: scan
