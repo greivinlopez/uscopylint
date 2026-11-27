@@ -54,14 +54,20 @@ func run(args []string, in io.Reader, out, errOut io.Writer) int {
 	})
 	f.StringVar(&o.terms, "terms", "", "additional UK | US terminology file")
 	f.Usage = func() {
-		fmt.Fprintln(errOut, "Usage: uscopylint [options] [file|directory ...]\nUse - for stdin. With no paths, scan the current directory.\nExit: 0 clean, 1 findings, 2 error.")
-		f.PrintDefaults()
+		fmt.Fprintln(errOut, "Run uscopylint --help for usage and examples.")
 	}
+	var showHelp bool
+	f.BoolVar(&showHelp, "help", false, "show usage and examples")
+	f.BoolVar(&showHelp, "h", false, "alias for --help")
 	if err := f.Parse(args); err != nil {
-		if err == flag.ErrHelp {
-			return 0
-		}
 		return 2
+	}
+	if showHelp {
+		if _, err := io.WriteString(out, helpText); err != nil {
+			fmt.Fprintln(errOut, "uscopylint:", err)
+			return 2
+		}
+		return 0
 	}
 	if *showVersion {
 		version := "(devel)"

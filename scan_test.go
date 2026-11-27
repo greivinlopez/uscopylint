@@ -61,6 +61,21 @@ func TestCLIMarkedSource(t *testing.T) {
 		t.Fatalf("status %d, stdout %q, stderr %q", status, out.String(), diag.String())
 	}
 }
+func TestHelp(t *testing.T) {
+	for _, option := range []string{"--help", "-h"} {
+		var out, diag bytes.Buffer
+		status := run([]string{option, "--terms", "absent/terms.txt", "-"}, nil, &out, &diag)
+		if status != 0 || diag.Len() != 0 {
+			t.Fatalf("%s: status %d, stderr %q", option, status, diag.String())
+		}
+		for _, topic := range []string{"Usage: uscopylint", "--changed HEAD", "--output JSON", "sourceLine", "endColumn", "Exit 1"} {
+			if !strings.Contains(out.String(), topic) {
+				t.Errorf("%s: help is missing %q", option, topic)
+			}
+		}
+	}
+}
+
 func TestVersionSkipsScan(t *testing.T) {
 	var out, diag bytes.Buffer
 	status := run([]string{"--version", "--terms", "absent/terms.txt", "-"}, nil, &out, &diag)
